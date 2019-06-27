@@ -13,9 +13,12 @@ const web3 = new Web3(provider, null, OPTIONS);
 const compiledContract = require('../compile');
 let interface = compiledContract['contracts']['Inbox.sol']['Inbox']['abi'];
 let bytecode =
-  compiledContract['contracts']['Inbox.sol']['Inbox']['evm']['bytecode'].object;
+  compiledContract['contracts']['Inbox.sol']['Inbox']['evm']['bytecode'][
+    'object'
+  ];
 
-const INITIAL_VALUE = 'Hi there!';
+// const INITIAL_VALUE = 'Hi there!';
+const INITIAL_VALUE = 'Pellentesque elit nulla posuere.';
 let accounts;
 let inbox;
 beforeEach(async () => {
@@ -23,7 +26,6 @@ beforeEach(async () => {
   inbox = await new web3.eth.Contract(interface, accounts[0])
     .deploy({
       data: bytecode,
-      arguments: [INITIAL_VALUE],
     })
     .send({
       from: accounts[0],
@@ -33,15 +35,20 @@ beforeEach(async () => {
 
 describe('Inbox', () => {
   it('deploys a contract', () => {
+    // console.log(inbox);
     assert.ok(inbox.options.address);
   });
-  it('has a default message', async () => {
-    const message = await inbox.methods.message().call();
-    assert.equal(message, INITIAL_VALUE);
+  it('set and get tweet', async () => {
+    await inbox.methods.setMessage(INITIAL_VALUE).send({ from: accounts[0] });
+    const response = await inbox.methods.getLatestTweet().call();
+    const newResponse = response.slice(0, INITIAL_VALUE.length);
+    assert.equal(newResponse, INITIAL_VALUE);
   });
-  it('can change the message', async () => {
-    await inbox.methods.setMessage('bye').send({ from: accounts[0] });
-    const message = await inbox.methods.message().call();
-    assert.equal(message, 'bye');
+  it('created tweet only 32 bytes', async () => {
+    await inbox.methods
+      .setMessage('Pellentesque elit nulla posuere....')
+      .send({ from: accounts[0] });
+    const response = await inbox.methods.getLatestTweet().call();
+    assert.equal(response, 'Pellentesque elit nulla posuere.');
   });
 });
