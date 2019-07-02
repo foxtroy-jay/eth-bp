@@ -13,52 +13,70 @@ struct Tweet {
         string text;
         string hashtag;
         uint blockNum;
-        mapping(uint => ReplyTweet) allTweets;
+        uint numReplies;
+        mapping(uint => ReplyTweet) replies;
     }
     
 struct User {
-    Tweet[] allTweets;
     address[] following;
     address[] follows;
+    uint numTweets;
+    mapping(uint => Tweet) allTweets;
 }
 
-mapping(address => User) allUsers;
+mapping(address => User) public allUsers;
 address[] public keyList;
 
     function createUser() public {
         address currAddress = msg.sender;
-        // Tweet[] memory defaultTweetArray;
-        address[] memory defaultFollowingArray;
-        address[] memory defaultFollowsArray;
-        
-        
-        // User memory newUser = User({
-        //     allTweets: defaultTweetArray,
-        //     following: defaultFollowingArray,
-        //     follows: defaultFollowsArray
-        // });
-        
+
+        allUsers[currAddress] = User(new address[](0), new address[](0), 0);
         keyList.push(currAddress);
-        allUsers[currAddress] = User(,defaultFollowingArray,defaultFollowsArray);
     } 
     
     // function getUser(address findUser) public view returns (User memory) {
     //     return allUsers[findUser];
     // }
     
-    function addStructMessage(string memory tweet) public {
-
+    function addStructMessage(string memory tweet, string memory hashT) public {
+        User storage currUser = allUsers[msg.sender];
+        uint currTweetCount = currUser.numTweets;
+        
         Tweet memory newTweet = Tweet({
             text: tweet,
-            hashtag: '',
-            blockNum: block.number
+            hashtag: hashT,
+            blockNum: block.number,
+            numReplies:0
         });
-
-    User storage u = allUsers[msg.sender];
-    Tweet[] storage t = u.allTweets;
-    t.push(newTweet);
-}
+        
+        currUser.allTweets[currTweetCount] = newTweet;
+        currUser.numTweets++;
+    }
     
+    function getStructMessage(address user, uint index) public view returns (string memory){
+        return allUsers[user].allTweets[index].text;
+    }
+    
+    //While creating tweets we will add button to reply with original address and index
+    function addReply(address tweetor, uint index, string memory replyString) public {
+         ReplyTweet memory newReply = ReplyTweet({
+             text: replyString,
+             sender:msg.sender
+         });
+        
+        //Fetch number of replies to current tweet
+        uint currReplyIndex = allUsers[tweetor].allTweets[index].numReplies;
+        
+        //Appending newReply to end of reply chain
+        allUsers[tweetor].allTweets[index].replies[currReplyIndex] = newReply;
+        
+        //Update number of replies
+        allUsers[tweetor].allTweets[index].numReplies++;
+    }
+    
+    function getReply(address user, uint tweetIndex, uint replyIndex) public view returns (string memory) {
+        return allUsers[user].allTweets[tweetIndex].replies[replyIndex].text;
+    }
 }
 
 
