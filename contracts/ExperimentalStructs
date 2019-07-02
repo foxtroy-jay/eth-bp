@@ -1,0 +1,123 @@
+pragma solidity ^0.5.8;
+pragma experimental ABIEncoderV2;
+
+
+contract Factory {
+
+struct ReplyTweet {
+    string text;
+    address sender;
+}    
+    
+struct Tweet {
+        string text;
+        string hashtag;
+        uint blockNum;
+        mapping(uint => ReplyTweet) allTweets;
+    }
+    
+struct User {
+    Tweet[] allTweets;
+    address[] following;
+    address[] follows;
+}
+
+mapping(address => User) allUsers;
+address[] public keyList;
+
+    function createUser() public {
+        address currAddress = msg.sender;
+        // Tweet[] memory defaultTweetArray;
+        address[] memory defaultFollowingArray;
+        address[] memory defaultFollowsArray;
+        
+        
+        // User memory newUser = User({
+        //     allTweets: defaultTweetArray,
+        //     following: defaultFollowingArray,
+        //     follows: defaultFollowsArray
+        // });
+        
+        keyList.push(currAddress);
+        allUsers[currAddress] = User(,defaultFollowingArray,defaultFollowsArray);
+    } 
+    
+    // function getUser(address findUser) public view returns (User memory) {
+    //     return allUsers[findUser];
+    // }
+    
+    function addStructMessage(string memory tweet) public {
+
+        Tweet memory newTweet = Tweet({
+            text: tweet,
+            hashtag: '',
+            blockNum: block.number
+        });
+
+    User storage u = allUsers[msg.sender];
+    Tweet[] storage t = u.allTweets;
+    t.push(newTweet);
+}
+    
+}
+
+
+
+
+  
+//  function getAllUsersIndex() public view returns (User[] memory){
+//      return allUsers[msg.sender];
+// }
+
+
+  
+// function addStructMessage(string memory tweet) public {
+
+//     mappingTest[msg.sender].push(Entry(tweet));
+// }
+
+// function checkStructMessage(uint index) public view returns (string memory){
+//     return mappingTest[msg.sender][index].text;
+// }
+
+
+//   function getMessageLength() public view returns (uint){
+//       return tweets[msg.sender].length;
+//   }
+
+//   function getKeys() public view returns (address[] memory) {
+//         return keyList;
+
+//   }
+
+
+// contract NEWUser {
+//     constructor (address creator) public{
+//         address manager = creator;
+//     }
+    
+    
+//     Tweet[] public allTweets;
+//     address[] following;
+//     address[] follows;
+//     uint numTweets;    
+        
+//     // function setMessage(string memory newMessage) public {
+//     //     allTweets.push(newMessage);
+//     // }
+    
+//     function addStructTweet(string memory tweet) public {
+//     //block.timeStamp or now will both return blocktime in uint
+//         allTweets[numTweets] = Tweet(tweet,'',block.number);
+//         numTweets++;
+//     }
+    
+//     //same as calling from allTweets
+//     function getMessageByIndex(uint index) public view returns (string memory) {
+//         return allTweets[index].text;
+//     }
+  
+//     // function fetchUserTweets(address user) public view returns (string[] memory) {
+//     //     return allTweets;
+//     // }
+// }
